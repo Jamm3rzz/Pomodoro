@@ -1,0 +1,13 @@
+.venv/
+venv/
+env/
+
+Lib/
+Include/
+Scripts/
+site/
+
+__pycache__/
+*.__pycache__
+
+.vscode/
