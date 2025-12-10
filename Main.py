@@ -4,87 +4,105 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 
-bgColor = "#11bbdd"
-textColor = "#002233"
-highlightColor = "#33ffff"
+BG_COLOR = "#11bbdd" # Full caps names for signifying the variable won't change values a "constant"
+TEXT_COLOR = "#002233" # Snake case for variables ssss LMAOO
+HIGHLIGHT_COLOR = "#33ffff"
 
-mixer.init()
-mixer.music.load(r'C:\Users\James\Documents\Mikubot\.venv\Include\Assets\taco-bell-bong-sfx.mp3')
-root = tk.Tk()
-root.title("study")
-root.geometry("600x400")
-backgroundImage = tk.PhotoImage(file=r"C:\Users\James\Desktop\Projects\Pomodoro\.venv\Include\Assets\Untitled design.png")
-icon = tk.PhotoImage(file=r"C:\Users\James\Desktop\Projects\Pomodoro\.venv\Include\Assets\taco.png")
-root.iconphoto(False, icon)
-sweetSpot = 0
-waitOrPlay = False
+AUDIO_PATH = r"C:\Users\James\Documents\Mikubot\.venv\Include\Assets\taco-bell-bong-sfx.mp3"
+BACKGROUND_IMAGE_PATH = r"Assets\Untitled design.png"
+ICON_PATH = r"Assets\taco.png"
 
-def FlippingHourGlass(WaitTime):
-    global sweetSpot, waitOrPlay
-    if WaitTime <= 0: 
-        sweetSpot = 0
+class PomodoroApp(): # Camel Case class names (I like camel case more than snake but snake is more readable </3)
+    def __init__(self, root: tk.Tk):
+        self.root = root
+
+        self.elapsed = 0
+        self.is_wait_time = False
+
+        self._setup_audio() # Underscores before names to signal that the func is not meant for use outside class.
+        self._setup_window() # Also snake case functions
+        self._setup_widgets()
+
+    def _setup_audio(self) -> None: # Already knew about specifying variables & return types :)
+        mixer.init()
+        mixer.music.load(AUDIO_PATH)
+
+    def _setup_window(self) -> None: # Keep function names lowercase
+        self.root.title("Pomodoro")
+        self.root.geometry("600x400")
+
+        bg_image = tk.PhotoImage(file=BACKGROUND_IMAGE_PATH)
+        icon = tk.PhotoImage(file=ICON_PATH)
+
+        self.background_label = tk.Label(self.root, image=bg_image)
+        self.background_label.image = bg_image
+        self.background_label.place(x=-2, y=-2) # Need to put -2...?
+
+        self.root.iconphoto(False, icon)
+
+    def _setup_widgets(self) -> None: # I decided to not use grid & just lock window size & place these bc it looked awful & bothered me.
+        self.time_work_entry = ttk.Entry(self.root)
+        self.time_play_entry = ttk.Entry(self.root)
+
+        self.progress_bar = ttk.Progressbar(
+            self.root,
+            orient="horizontal",
+            mode="determinate",
+            length=300
+        )
+
+        start_button = tk.Button(
+            self.root,
+            text="Start",
+            bg=BG_COLOR,
+            fg=TEXT_COLOR,
+            command=lambda: self.start_timer(0)
+        )
+
+        # This is where I'm actually placing everything!
+        # Also I'll be moving all of these bc IK my app looks like ass rn... but I just taught myself git & it's 2am gimme a break.
+        self.time_work_entry.place(x=200, y=150)
+        self.time_play_entry.place(x=200, y=200)
+        start_button.place(x=260, y=250)
+        self.progress_bar.place(x=150, y=300)
+
+    def start_timer(self, remaining_seconds: int) -> None: # See? External function not internal :D no underscore in front good job James!!! 
+        """Main timer loop, called every second using Tkinter's scheduler.""" # Use these to explain External function's use <3
+        if remaining_seconds <= 0:
+            self._cycle_phase()
+            return
+
+        self.elapsed += 1
+        self.progress_bar["value"] = self.elapsed
+
+        # Schedule next second
+        self.root.after(
+            1000,
+            lambda: self.start_timer(remaining_seconds - 1)
+        )
+    
+    def _cycle_phase(self) -> None:
+        """Switch between Work and Play periods and restart timer."""
+        self.elapsed = 0
         mixer.music.play()
-        if waitOrPlay: # Time play
-            timePlayVal = int(timePlay.get()) * 60
-            progressBar["maximum"] = timePlayVal
-            progressBar["value"] = sweetSpot
-            waitOrPlay = False
-            FlippingHourGlass(timePlayVal)
-        else: # Time work 
-            timeWorkVal = int(timeWork.get()) * 60
-            progressBar["maximum"] = timeWorkVal
-            progressBar["value"] = sweetSpot
-            waitOrPlay = True
-            FlippingHourGlass(timeWorkVal)
-    else:
-        sweetSpot += 1
-        progressBar['value'] = sweetSpot
-        root.after(1000, lambda: (FlippingHourGlass(WaitTime - 1)))
 
-def Sizing(amount: int) -> None: 
-    for x in range(amount):
-        root.grid_columnconfigure(x, minsize=10 ,weight = 1)
-        frame = tk.Frame(root, background='')
-        frame.grid(row = 0, column = x, sticky = "nsew")
-        frame.grid_propagate(False)
-        for i in range(amount):
-            root.grid_rowconfigure(i, minsize=10, weight = 1)
-            frame = tk.Frame(root, background='')
-            frame.grid(row = i, column = x, sticky = "nsew")
-            frame.grid_propagate(False)
+        if self.is_wait_time:
+            # Play time segment
+            seconds = int(self.time_play_entry.get()) * 60
+            self.is_wait_time = False
+        else:
+            # Work segment
+            seconds = int(self.time_work_entry.get()) * 60
+            self.is_wait_time = True
 
-background = tk.Label(root, image=backgroundImage)
-background.place(x=-2, y=-2)
+        self.progress_bar["maximum"] = seconds
+        self.progress_bar["value"] = 0
+        self.start_timer(seconds)
 
-Sizing(5)
+def main() -> None:
+    root = tk.Tk()
+    app = PomodoroApp(root)
+    root.mainloop()
 
-textColor = tk.Canvas()
-
-
-
-#title = tk.Label(root, textColor="Focus on your task", background=bgColor, foreground=textColor)
-#title.grid(row=0, column=2) # --
-
-start = tk.Button(root, background=bgColor, foreground=textColor, command=lambda: FlippingHourGlass(0)) # lambda is for handing functions as a VALUE to be used later as opposed to them being called that moment. Like handing a note on how to do smth instead of doing it when asked.
-#start.grid(row=4, column=1) # --
-
-#workLabel = tk.Label(root, textColor="Work time: ", background=bgColor, foreground=textColor)
-#workLabel.grid(row=2, column=1) # --
-
-timeWork = ttk.Entry(root, background=bgColor, foreground=textColor)
-#timeWork.grid(row=2, column=2) # --
-
-#playLabel = tk.Label(root, textColor="Play time: ", background=bgColor, foreground=textColor)
-#playLabel.grid(row=3, column=1) # --
-
-timePlay = ttk.Entry(root, background=bgColor, foreground=textColor)
-#timePlay.grid(row=3, column=2) # --
-
-progressBar = ttk.Progressbar(root, orient="horizontal", mode="determinate", length=300)
-
-#progressBar.grid(row=4, column=2) # --
-
-progressBar['maximum'] = None
-progressBar['value'] = None #
-
-root.mainloop()
+if __name__ == "__main__":
+    main()
