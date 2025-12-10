@@ -4,9 +4,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import *
 
-bg = "#11bbdd"
-text = "#002233"
-highlight = "#33ffff"
+bgColor = "#11bbdd"
+textColor = "#002233"
+highlightColor = "#33ffff"
 
 mixer.init()
 mixer.music.load(r'C:\Users\James\Documents\Mikubot\.venv\Include\Assets\taco-bell-bong-sfx.mp3')
@@ -24,13 +24,13 @@ def FlippingHourGlass(WaitTime):
     if WaitTime <= 0: 
         sweetSpot = 0
         mixer.music.play()
-        if waitOrPlay: # Function runs when switching to play time, "waitOrPlay == True"
+        if waitOrPlay: # Time play
             timePlayVal = int(timePlay.get()) * 60
             progressBar["maximum"] = timePlayVal
             progressBar["value"] = sweetSpot
             waitOrPlay = False
             FlippingHourGlass(timePlayVal)
-        else: # Function runs when switching to work time, "waitOrPlay == False"
+        else: # Time work 
             timeWorkVal = int(timeWork.get()) * 60
             progressBar["maximum"] = timeWorkVal
             progressBar["value"] = sweetSpot
@@ -41,7 +41,7 @@ def FlippingHourGlass(WaitTime):
         progressBar['value'] = sweetSpot
         root.after(1000, lambda: (FlippingHourGlass(WaitTime - 1)))
 
-def Sizing(amount: int) -> None: # Could make this save the grid to a list so I could actually put things in the frames?
+def Sizing(amount: int) -> None: 
     for x in range(amount):
         root.grid_columnconfigure(x, minsize=10 ,weight = 1)
         frame = tk.Frame(root, background='')
@@ -58,26 +58,26 @@ background.place(x=-2, y=-2)
 
 Sizing(5)
 
-tk.Canvas()
+textColor = tk.Canvas()
 
 
 
-#title = tk.Label(root, text="Focus on your task", background=bg, foreground=text)
+#title = tk.Label(root, textColor="Focus on your task", background=bgColor, foreground=textColor)
 #title.grid(row=0, column=2) # --
 
-start = tk.Button(root, background=bg, foreground=text, command=lambda: FlippingHourGlass(0)) # lambda is for handing functions as a VALUE to be used later as opposed to them being called that moment. Like handing a note on how to do smth instead of doing it when asked.
+start = tk.Button(root, background=bgColor, foreground=textColor, command=lambda: FlippingHourGlass(0)) # lambda is for handing functions as a VALUE to be used later as opposed to them being called that moment. Like handing a note on how to do smth instead of doing it when asked.
 #start.grid(row=4, column=1) # --
 
-#workLabel = tk.Label(root, text="Work time: ", background=bg, foreground=text)
+#workLabel = tk.Label(root, textColor="Work time: ", background=bgColor, foreground=textColor)
 #workLabel.grid(row=2, column=1) # --
 
-timeWork = ttk.Entry(root, background=bg, foreground=text)
+timeWork = ttk.Entry(root, background=bgColor, foreground=textColor)
 #timeWork.grid(row=2, column=2) # --
 
-#playLabel = tk.Label(root, text="Play time: ", background=bg, foreground=text)
+#playLabel = tk.Label(root, textColor="Play time: ", background=bgColor, foreground=textColor)
 #playLabel.grid(row=3, column=1) # --
 
-timePlay = ttk.Entry(root, background=bg, foreground=text)
+timePlay = ttk.Entry(root, background=bgColor, foreground=textColor)
 #timePlay.grid(row=3, column=2) # --
 
 progressBar = ttk.Progressbar(root, orient="horizontal", mode="determinate", length=300)
